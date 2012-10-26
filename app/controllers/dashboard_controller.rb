@@ -2,10 +2,12 @@ class DashboardController < ApplicationController
   respond_to :html
 
   def index
-    @projects = current_user.projects_with_events.page(params[:page]).per(40)
+    @groups = Group.where(id: current_user.projects.pluck(:group_id))
+    @projects = current_user.projects_with_events
+    @projects = @projects.page(params[:page]).per(30)
     @public_projects = Project.find_all_by_private_flag(false) - @projects
-    #@events = Event.recent_for_user(current_user).limit(20).offset(params[:offset] || 0)
-    @events = Event.recent_for_projects(@projects + @public_projects).limit(20).offset(params[:offset] || 0)
+
+    @events = Event.in_projects(current_user.project_ids | @public_projects.map(&:id)).limit(20).offset(params[:offset] || 0)
     @last_push = current_user.recent_push
 
     respond_to do |format|
@@ -18,14 +20,14 @@ class DashboardController < ApplicationController
   # Get authored or assigned open merge requests
   def merge_requests
     @projects = current_user.projects.all
-    @merge_requests = current_user.cared_merge_requests.order("created_at DESC").page(params[:page]).per(20)
+    @merge_requests = current_user.cared_merge_requests.recent.page(params[:page]).per(20)
   end
 
   # Get only assigned issues
   def issues
     @projects = current_user.projects.all
     @user   = current_user
-    @issues = current_user.assigned_issues.opened.order("created_at DESC").page(params[:page]).per(20)
+    @issues = current_user.assigned_issues.opened.recent.page(params[:page]).per(20)
     @issues = @issues.includes(:author, :project)
 
     respond_to do |format|

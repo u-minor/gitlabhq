@@ -1,9 +1,5 @@
-class TeamMembersController < ApplicationController
-  before_filter :project
-  layout "project"
-
+class TeamMembersController < ProjectResourceController
   # Authorize
-  before_filter :add_project_abilities
   before_filter :authorize_read_project!
   before_filter :authorize_admin_project!, except: [:index, :show]
 
@@ -46,5 +42,13 @@ class TeamMembersController < ApplicationController
       format.html { redirect_to project_team_index_path(@project) }
       format.js { render nothing: true }
     end
+  end
+
+  def apply_import
+    giver = Project.find(params[:source_project_id])
+    status = UsersProject.import_team(giver, project)
+    notice = status ? "Succesfully imported" : "Import failed"
+
+    redirect_to project_team_members_path(project), notice: notice
   end
 end

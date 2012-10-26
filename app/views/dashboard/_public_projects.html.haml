@@ -1,0 +1,17 @@
+.projects_box
+  %h5
+    Public Projects
+    %small
+      (#{@public_projects.count})
+  - if @public_projects.any?
+    - @public_projects.each do |project|
+      = link_to project_path(project), class: dom_class(project) do
+        %h4
+          %span.ico.project
+          = truncate(project.name, length: 25)
+          %span.right
+            &rarr;
+  - else
+    %h4
+      .project No Public Projects
+  .bottom
