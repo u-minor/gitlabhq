@@ -2,16 +2,23 @@
   %h5
     Public Projects
     %small
-      (#{@public_projects.count})
-  - if @public_projects.any?
-    - @public_projects.each do |project|
-      = link_to project_path(project), class: dom_class(project) do
-        %h4
+      (#{public_projects.count})
+  %ul.well-list
+    - public_projects.each do |project|
+      %li
+        = link_to project_path(project), class: dom_class(project) do
           %span.ico.project
-          = truncate(project.name, length: 25)
-          %span.right
+          - if project.namespace
+            = project.namespace.human_name
+            \/
+          %strong.well-title
+            = truncate(project.name, length: 25)
+          %span.arrow
             &rarr;
-  - else
-    %h4
-      .project No Public Projects
+          %span.last_activity
+            %strong Last activity:
+            %span= project_last_activity(project)
+  - if public_projects.blank?
+    %li
+      %h3.nothing_here_message There are no public projects here.
   .bottom
