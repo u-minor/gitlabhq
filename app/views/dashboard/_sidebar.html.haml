@@ -1,7 +1,6 @@
 - if @groups.present?
   = render "groups", groups: @groups
 = render "projects", projects: @projects
-= render "public_projects", public_projects: @public_projects
 %div
   %span.rss-icon
     = link_to dashboard_path(:atom, { private_token: current_user.private_token }) do

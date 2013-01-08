@@ -14,14 +14,15 @@ class DashboardController < ApplicationController
                   @projects.personal(current_user)
                 when 'joined' then
                   @projects.joined(current_user)
+                when 'public' then
+                  Project.public_only
                 else
                   @projects
                 end
 
     @projects = @projects.page(params[:page]).per(30)
-    @public_projects = Project.find_all_by_private_flag(false) - @projects
 
-    @events = Event.in_projects(current_user.project_ids | @public_projects.map(&:id))
+    @events = Event.in_projects(current_user.project_ids)
     @events = @event_filter.apply_filter(@events)
     @events = @events.limit(20).offset(params[:offset] || 0)
 
