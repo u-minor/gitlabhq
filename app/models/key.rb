@@ -23,13 +23,21 @@ class Key < ActiveRecord::Base
   before_validation :strip_white_space
 
   validates :title, presence: true, length: { within: 0..255 }
-  validates :key, presence: true, length: { within: 0..5000 }, format: { with: /ssh-.{3} / }, uniqueness: true
-  validate :fingerprintable_key
+  validates :key, presence: true, length: { within: 0..5000 }, format: { with: /ssh-.{3} / }
+  validate :fingerprintable_key, :unique_key
 
   delegate :name, :email, to: :user, prefix: true
 
   def strip_white_space
     self.key = self.key.strip unless self.key.blank?
+  end
+
+  def unique_key
+    query = Key.where(key: key)
+    query = query.where('(project_id IS NULL OR project_id = ?)', project_id) if project_id
+    if (query.count > 0)
+      errors.add :key, 'already exist.'
+    end
   end
 
   def fingerprintable_key

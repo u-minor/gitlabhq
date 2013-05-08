@@ -26,7 +26,12 @@ module Gitlab
 
 
         if key.is_deploy_key
-          project == key.project && git_cmd == 'git-upload-pack'
+          # multi deploy key hack
+          keys = Key.find_all_by_key(key.key)
+          keys.each do |k|
+            return true if project == k.project && git_cmd == 'git-upload-pack'
+          end
+          false
         else
           user = key.user
 
